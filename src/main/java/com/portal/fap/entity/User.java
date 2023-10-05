@@ -1,7 +1,6 @@
 package com.portal.fap.entity;
 
 import com.portal.fap.common.Gender;
-import com.portal.fap.common.Role;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -41,7 +40,4 @@ public class User {
     @JoinColumn(name = "image_id", referencedColumnName = "id")
     private Image image;
 
-    @Enumerated(EnumType.ORDINAL)
-    @Column(name = "role", nullable = false)
-    private Role role;
 }

@@ -1,10 +1,7 @@
 package com.portal.fap.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -19,6 +16,7 @@ import java.util.Set;
 @AllArgsConstructor
 @Getter
 @Setter
+@Builder
 public class Account implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,7 +25,7 @@ public class Account implements UserDetails {
     @Column(name = "username", length = 64, nullable = false, unique = true)
     private String username;
 
-    @Column(name = "password", length = 64, nullable = false)
+    @Column(name = "password", length = 128, nullable = false)
     private String password;
 
     @Column(name = "email", length = 64, nullable = false)

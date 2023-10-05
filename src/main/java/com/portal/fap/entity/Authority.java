@@ -28,6 +28,9 @@ public class Authority implements GrantedAuthority {
             inverseJoinColumns = @JoinColumn(name = "account_id"))
     private Set<Account> accounts = new HashSet<>();
 
+    public Authority(String name) {
+        this.name = name;
+    }
     @Override
     public String getAuthority() {
         return name;
