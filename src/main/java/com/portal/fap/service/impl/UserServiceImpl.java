@@ -1,12 +1,13 @@
 package com.portal.fap.service.impl;
 
+import com.portal.fap.common.Authority;
 import com.portal.fap.dto.request.UserDetailRequestDto;
 import com.portal.fap.dto.response.UserDetailResponseDto;
 import com.portal.fap.entity.Account;
-import com.portal.fap.entity.Authority;
 import com.portal.fap.entity.User;
 import com.portal.fap.exception.BadRequestResponseException;
 import com.portal.fap.exception.NotFoundResponseException;
+import com.portal.fap.repository.CIInformationRepository;
 import com.portal.fap.repository.UserRepository;
 import com.portal.fap.service.AccountService;
 import com.portal.fap.service.UserService;
@@ -26,6 +27,8 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private UserRepository userRepository;
     @Autowired
+    private CIInformationRepository ciInformationRepository;
+    @Autowired
     private AccountService accountService;
 
     @Override
@@ -41,19 +44,17 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDetailResponseDto addUser(UserDetailRequestDto dto) {
         Account account = Account.builder()
-                .username(UsernameUtils.generateUsernameFromName(dto.getName()))
-                .email(EmailUtils.generateEmailFromName(dto.getName()))
+                .username(UsernameUtils.generateUsernameFromName(dto.getInformation().getFullName()))
+                .email(EmailUtils.generateEmailFromName(dto.getInformation().getFullName()))
                 .password("ABD@#$123")
-                .authorities(Set.of(new Authority("STUDENT")))
+                .authorities(Set.of(Authority.STUDENT))
                 .build();
         account = accountService.save(account);
         User user = User.builder()
                 .account(account)
-                .idCard(dto.getIdCard())
-                .address(dto.getAddress())
-                .gender(dto.getGender())
+                .information(dto.getInformation())
                 .phones(dto.getPhones())
-                .fullName(dto.getName())
+
                 .build();
         return new UserDetailResponseDto(save(user));
     }
@@ -62,11 +63,8 @@ public class UserServiceImpl implements UserService {
     public UserDetailResponseDto editUser(UserDetailRequestDto dto, Long userid) {
         User user = User.builder()
                 .id(userid)
-                .idCard(dto.getIdCard())
-                .address(dto.getAddress())
-                .gender(dto.getGender())
+                .information(dto.getInformation())
                 .phones(dto.getPhones())
-                .fullName(dto.getName())
                 .build();
         return new UserDetailResponseDto(save(user));
     }
@@ -80,7 +78,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public User save(User user) {
         List<String> invalids = ValidUser.getUserInvalids(user);
-        if (userRepository.existsByIdCard(user.getIdCard()) && user.getId() == 0) {
+        if (ciInformationRepository.existsByIdCard(user.getInformation().getIdCard()) && user.getId() == 0) {
             invalids.add("212 : User id card must be unique");
         }
         if (invalids.size() != 0) {

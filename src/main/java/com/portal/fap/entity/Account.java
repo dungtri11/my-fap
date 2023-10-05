@@ -1,14 +1,12 @@
 package com.portal.fap.entity;
 
+import com.portal.fap.common.Authority;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Entity
 @Table(name = "account")
@@ -31,14 +29,22 @@ public class Account implements UserDetails {
     @Column(name = "email", length = 64, nullable = false)
     private String email;
 
-    @ManyToMany(mappedBy = "accounts")
-    private Set<Authority> authorities;
+    @ElementCollection(targetClass = Authority.class, fetch = FetchType.EAGER)
+    @CollectionTable(name = "has_authorities", joinColumns = @JoinColumn(name = "user_id"))
+    @Column(name = "authority")
+    @Enumerated(EnumType.STRING)
+    private Set<Authority> authorities = new HashSet<>();
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         List<GrantedAuthority> grantedAuthorities = new ArrayList<>();
         for (Authority authority : authorities) {
-            grantedAuthorities.add(authority);
+            grantedAuthorities.add(new GrantedAuthority() {
+                @Override
+                public String getAuthority() {
+                    return authority.toString();
+                }
+            });
         }
         return grantedAuthorities;
     }

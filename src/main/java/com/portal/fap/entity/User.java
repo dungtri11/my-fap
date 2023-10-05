@@ -20,24 +20,14 @@ public class User {
     @JoinColumn(name = "account_id", referencedColumnName = "id")
     private Account account;
 
-    @Column(name = "id_card", length = 16, nullable = false)
-    private String idCard;
-
-    @Column(name = "full_name", length = 128, nullable = false)
-    private String fullName;
-
-    @Enumerated(EnumType.ORDINAL)
-    @Column(name = "gender")
-    private Gender gender;
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "ci_id", referencedColumnName = "id")
+    private CIInformation information;
 
     @Column(name = "phones", length = 32)
     private String phones;
 
-    @Column(name = "address", length = 128)
-    private String address;
-
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "image_id", referencedColumnName = "id")
     private Image image;
-
 }

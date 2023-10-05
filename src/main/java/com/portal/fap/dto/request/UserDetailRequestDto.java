@@ -1,15 +1,17 @@
 package com.portal.fap.dto.request;
 
 import com.portal.fap.common.Gender;
+import com.portal.fap.entity.CIInformation;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
 @Setter
+@AllArgsConstructor
+@NoArgsConstructor
 public class UserDetailRequestDto {
-    private String name;
-    private String idCard;
-    private Gender gender;
+    private CIInformation information;
     private String phones;
-    private String address;
 }

@@ -45,7 +45,7 @@ public class JwtAuthenticationFilter implements Filter {
             filterChain.doFilter(request, response);
             return;
         }
-
+        log.info("this is username : {}", username);
         Authentication authentication =
                 new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
 

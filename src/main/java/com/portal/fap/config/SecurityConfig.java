@@ -1,5 +1,6 @@
 package com.portal.fap.config;
 
+import com.portal.fap.common.Authority;
 import com.portal.fap.filter.JwtAuthenticationFilter;
 import com.portal.fap.jwt.JwtAuthenticationEntryPoint;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +18,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.intercept.AuthorizationFilter;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
@@ -51,10 +53,10 @@ public class SecurityConfig {
                 .securityMatcher(AntPathRequestMatcher.antMatcher("/auth/**"))
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.POST,"/login")).anonymous()
-                        .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.POST,"/register")).anonymous()
-                        .anyRequest().authenticated())
-                .addFilterBefore(filter, UsernamePasswordAuthenticationFilter.class);
+                        .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.POST,"/auth/login")).permitAll()
+                        .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.POST,"/auth/register")).permitAll()
+                        .anyRequest().denyAll())
+                .addFilterBefore(filter, AuthorizationFilter.class);
         return http.build();
     }
 
@@ -65,8 +67,17 @@ public class SecurityConfig {
                 .exceptionHandling(handler -> handler.authenticationEntryPoint(entryPoint))
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.POST, "/add")).permitAll()
-                        .anyRequest().permitAll());
+                        .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.POST, "/user/add"))
+                        .hasAuthority("ADMIN")
+                        //--------------------------------
+                        .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.PUT, "/user/edit/**"))
+                        .hasAuthority("ADMIN")
+                        //--------------------------------
+                        .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.GET, "/user/detail/**"))
+                        .hasAuthority("ADMIN")
+                        .anyRequest().denyAll())
+                .addFilterBefore(filter, AuthorizationFilter.class);
+
         return http.build();
     }
 
