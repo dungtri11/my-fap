@@ -33,6 +33,7 @@ public class ImageServiceImpl implements ImageService {
 
     @Override
     public Image saveImage(MultipartFile file, Long imageId) throws IOException {
+        if (file == null) return null;
         long current = System.currentTimeMillis();
         String filename = "img" + current + "." + file.getContentType().replaceAll("image/", "");
         String path = IMAGE_REPO_PATH + filename;

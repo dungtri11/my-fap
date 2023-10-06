@@ -1,9 +1,7 @@
 package com.portal.fap.service.impl;
 
-import com.portal.fap.common.Authority;
-import com.portal.fap.dto.request.UserDetailRequestDto;
+import com.portal.fap.dto.request.UserDetailDto;
 import com.portal.fap.dto.response.UserDetailResponseDto;
-import com.portal.fap.entity.Account;
 import com.portal.fap.entity.User;
 import com.portal.fap.exception.BadRequestResponseException;
 import com.portal.fap.exception.NotFoundResponseException;
@@ -12,15 +10,12 @@ import com.portal.fap.repository.UserRepository;
 import com.portal.fap.service.AccountService;
 import com.portal.fap.service.ImageService;
 import com.portal.fap.service.UserService;
-import com.portal.fap.utils.EmailUtils;
-import com.portal.fap.utils.UsernameUtils;
 import com.portal.fap.validation.ValidUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -46,16 +41,9 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDetailResponseDto addUser(UserDetailRequestDto dto) throws IOException {
-        Account account = Account.builder()
-                .username(UsernameUtils.generateUsernameFromName(dto.getInformation().getFullName()))
-                .email(EmailUtils.generateEmailFromName(dto.getInformation().getFullName()))
-                .password("ABD@#$123")
-                .authorities(Set.of(Authority.STUDENT))
-                .build();
-        account = accountService.save(account);
+    public UserDetailResponseDto addUser(UserDetailDto dto) throws IOException {
         User user = User.builder()
-                .account(account)
+                .account(accountService.createDefaultAccount(dto))
                 .ciInformation(dto.getInformation())
                 .phones(dto.getPhones())
                 .image(imageService.saveImage(dto.getImageFile(), null))
@@ -64,7 +52,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDetailResponseDto editUser(UserDetailRequestDto dto, Long userid) throws IOException {
+    public UserDetailResponseDto editUser(UserDetailDto dto, Long userid) throws IOException {
         User user = findById(userid);
         Long imageId = (user.getImage() != null ? user.getImage().getId() : null);
         if (dto.getImageFile() != null) {
