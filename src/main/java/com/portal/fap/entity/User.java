@@ -1,8 +1,9 @@
 package com.portal.fap.entity;
 
-import com.portal.fap.common.Gender;
+import com.portal.fap.common.Role;
 import jakarta.persistence.*;
 import lombok.*;
+
 
 @Entity
 @Table(name = "user")
@@ -22,7 +23,11 @@ public class User {
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "ci_id", referencedColumnName = "id")
-    private CIInformation information;
+    private CIInformation ciInformation;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "academic_id", referencedColumnName = "id")
+    private AcademicInformation academicInformation;
 
     @Column(name = "phones", length = 32)
     private String phones;
@@ -30,4 +35,8 @@ public class User {
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "image_id", referencedColumnName = "id")
     private Image image;
+
+    @Column(name = "role")
+    @Enumerated(EnumType.STRING)
+    private Role role;
 }

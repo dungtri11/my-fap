@@ -10,6 +10,7 @@ import com.portal.fap.exception.NotFoundResponseException;
 import com.portal.fap.repository.CIInformationRepository;
 import com.portal.fap.repository.UserRepository;
 import com.portal.fap.service.AccountService;
+import com.portal.fap.service.ImageService;
 import com.portal.fap.service.UserService;
 import com.portal.fap.utils.EmailUtils;
 import com.portal.fap.utils.UsernameUtils;
@@ -17,6 +18,7 @@ import com.portal.fap.validation.ValidUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -26,6 +28,8 @@ public class UserServiceImpl implements UserService {
     private final String IMAGE_REPO_URI = "http://localhost:8080/image/";
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private ImageService imageService;
     @Autowired
     private CIInformationRepository ciInformationRepository;
     @Autowired
@@ -42,7 +46,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDetailResponseDto addUser(UserDetailRequestDto dto) {
+    public UserDetailResponseDto addUser(UserDetailRequestDto dto) throws IOException {
         Account account = Account.builder()
                 .username(UsernameUtils.generateUsernameFromName(dto.getInformation().getFullName()))
                 .email(EmailUtils.generateEmailFromName(dto.getInformation().getFullName()))
@@ -52,20 +56,26 @@ public class UserServiceImpl implements UserService {
         account = accountService.save(account);
         User user = User.builder()
                 .account(account)
-                .information(dto.getInformation())
+                .ciInformation(dto.getInformation())
                 .phones(dto.getPhones())
-
+                .image(imageService.saveImage(dto.getImageFile(), null))
                 .build();
         return new UserDetailResponseDto(save(user));
     }
 
     @Override
-    public UserDetailResponseDto editUser(UserDetailRequestDto dto, Long userid) {
-        User user = User.builder()
-                .id(userid)
-                .information(dto.getInformation())
-                .phones(dto.getPhones())
-                .build();
+    public UserDetailResponseDto editUser(UserDetailRequestDto dto, Long userid) throws IOException {
+        User user = findById(userid);
+        Long imageId = (user.getImage() != null ? user.getImage().getId() : null);
+        if (dto.getImageFile() != null) {
+            user.setImage(imageService.saveImage(dto.getImageFile(), imageId));
+        }
+        if (dto.getPhones() != null) {
+            user.setPhones(dto.getPhones());
+        }
+        if (dto.getInformation() != null) {
+            user.setCiInformation(dto.getInformation());
+        }
         return new UserDetailResponseDto(save(user));
     }
 
@@ -78,7 +88,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public User save(User user) {
         List<String> invalids = ValidUser.getUserInvalids(user);
-        if (ciInformationRepository.existsByIdCard(user.getInformation().getIdCard()) && user.getId() == 0) {
+        if (ciInformationRepository.existsByIdCard(user.getCiInformation().getIdCard()) && user.getId() == 0) {
             invalids.add("212 : User id card must be unique");
         }
         if (invalids.size() != 0) {

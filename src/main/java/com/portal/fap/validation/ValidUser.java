@@ -15,14 +15,14 @@ public class ValidUser {
                 Stream.concat(
                         Stream.concat(
                                 Stream.concat(
-                                        getNameInvalids(user.getInformation().getFullName()).stream(),
-                                        getIdCardInvalids(user.getInformation().getIdCard()).stream()
+                                        getNameInvalids(user.getCiInformation().getFullName()).stream(),
+                                        getIdCardInvalids(user.getCiInformation().getIdCard()).stream()
                                 ),
-                                getGenderInvalids(user.getInformation().getGender()).stream()
+                                getGenderInvalids(user.getCiInformation().getGender()).stream()
                         ),
                         getPhoneInvalids(user.getPhones()).stream()
                 ),
-                getAddressInvalids(user.getInformation().getAddress()).stream()
+                getAddressInvalids(user.getCiInformation().getAddress()).stream()
         ).collect(Collectors.toList());
     }
 

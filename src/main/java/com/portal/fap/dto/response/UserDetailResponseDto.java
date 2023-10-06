@@ -23,9 +23,9 @@ public class UserDetailResponseDto {
     public UserDetailResponseDto(User user) {
         this.username = user.getAccount().getUsername();
         this.email = user.getAccount().getEmail();
-        this.name = user.getInformation().getFullName();
-        this.gender = user.getInformation().getGender();
+        this.name = user.getCiInformation().getFullName();
+        this.gender = user.getCiInformation().getGender();
         this.phones = user.getPhones();
-        this.address = user.getInformation().getAddress();
+        this.address = user.getCiInformation().getAddress();
     }
 }

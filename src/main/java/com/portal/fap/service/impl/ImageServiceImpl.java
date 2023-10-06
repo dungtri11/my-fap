@@ -32,27 +32,24 @@ public class ImageServiceImpl implements ImageService {
     }
 
     @Override
-    public Image saveImage(MultipartFile file, Long userid) throws IOException {
-        User user = userService.findById(userid);
-        Long imageId = (user.getImage() == null ? null : user.getImage().getId());
+    public Image saveImage(MultipartFile file, Long imageId) throws IOException {
         long current = System.currentTimeMillis();
-        String path = IMAGE_REPO_PATH + current + file.getOriginalFilename().replaceAll("\s", "_");
+        String filename = "img" + current + "." + file.getContentType().replaceAll("image/", "");
+        String path = IMAGE_REPO_PATH + filename;
         if (imageId != null && imageRepository.existsById(imageId)) {
             removeImage(imageId);
         }
         Image image = imageRepository.save(
                 (imageId == null ?  Image.builder()
-                        .name(current + file.getOriginalFilename())
+                        .name(filename)
                         .type(file.getContentType())
                         .path(path).build() :
                         Image.builder()
-                                .name(current + file.getOriginalFilename())
+                                .name(filename)
                                 .type(file.getContentType())
                                 .path(path)
                                 .id(imageId).build())
         );
-        user.setImage(image);
-        userService.save(user);
         file.transferTo(new File(path));
         return image;
     }
@@ -60,7 +57,7 @@ public class ImageServiceImpl implements ImageService {
     @Override
     public void removeImage(Long id) throws IOException {
         Image image = imageRepository.findById(id).orElseThrow(() ->
-                new BadRequestResponseException("202 : Can't find suitable image data"));
+                new NotFoundResponseException("202 : Can't find suitable image data"));
         Files.delete(new File(image.getPath()).toPath());
     }
 }

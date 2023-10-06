@@ -1,6 +1,5 @@
 package com.portal.fap.dto.request;
 
-import com.portal.fap.entity.CIInformation;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -9,10 +8,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
-public class UserDetailRequestDto {
-    private CIInformation information;
-    private String phones;
-    private MultipartFile imageFile;
+@AllArgsConstructor
+public class SaveImageRequestDto {
+    private MultipartFile file;
+    private Long imageId;
 }

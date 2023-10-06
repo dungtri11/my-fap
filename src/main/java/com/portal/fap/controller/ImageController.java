@@ -1,5 +1,6 @@
 package com.portal.fap.controller;
 
+import com.portal.fap.dto.request.SaveImageRequestDto;
 import com.portal.fap.entity.Image;
 import com.portal.fap.service.ImageService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,9 +21,8 @@ public class ImageController {
     private ImageService imageService;
 
     @PatchMapping("/save")
-    public ResponseEntity<?> saveImage(@RequestParam("image") MultipartFile file,
-                                       @RequestParam(value = "userid", required = false) Long userid) throws IOException {
-        Image response = imageService.saveImage(file, userid);
+    public ResponseEntity<?> saveImage(@RequestBody SaveImageRequestDto dto) throws IOException {
+        Image response = imageService.saveImage(dto.getFile(), dto.getImageId());
         return ResponseEntity.ok(response);
     }
 

@@ -67,15 +67,15 @@ public class SecurityConfig {
                 .exceptionHandling(handler -> handler.authenticationEntryPoint(entryPoint))
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.POST, "/user/add"))
-                        .hasAuthority("ADMIN")
-                        //--------------------------------
-                        .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.PUT, "/user/edit/**"))
-                        .hasAuthority("ADMIN")
-                        //--------------------------------
-                        .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.GET, "/user/detail/**"))
-                        .hasAuthority("ADMIN")
-                        .anyRequest().denyAll())
+//                        .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.POST, "/user/add"))
+//                        .hasAuthority("ADMIN")
+//                        //--------------------------------
+//                        .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.PUT, "/user/edit/**"))
+//                        .hasAuthority("ADMIN")
+//                        //--------------------------------
+//                        .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.GET, "/user/detail/**"))
+//                        .hasAuthority("ADMIN")
+                        .anyRequest().permitAll())
                 .addFilterBefore(filter, AuthorizationFilter.class);
 
         return http.build();
