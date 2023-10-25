@@ -1,88 +1,87 @@
 package com.portal.fap.service.impl;
 
-import com.portal.fap.dto.request.UserDetailDto;
-import com.portal.fap.dto.response.UserDetailResponseDto;
+import com.portal.fap.common.Authority;
+import com.portal.fap.common.Status;
+import com.portal.fap.dto.Response;
+import com.portal.fap.dto.request.AuthenticationInfo;
+import com.portal.fap.dto.request.RegistrationInfo;
+import com.portal.fap.dto.response.AuthResponseDto;
+import com.portal.fap.entity.Profile;
 import com.portal.fap.entity.User;
-import com.portal.fap.exception.BadRequestResponseException;
 import com.portal.fap.exception.NotFoundResponseException;
-import com.portal.fap.repository.CIInformationRepository;
+import com.portal.fap.repository.ProfileRepository;
 import com.portal.fap.repository.UserRepository;
-import com.portal.fap.service.AccountService;
-import com.portal.fap.service.ImageService;
 import com.portal.fap.service.UserService;
-import com.portal.fap.validation.ValidUser;
+import com.portal.fap.utils.JwtUtils;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class UserServiceImpl implements UserService {
-    private final String IMAGE_REPO_URI = "http://localhost:8080/image/";
+    @Autowired
+    private ProfileRepository profileRepository;
     @Autowired
     private UserRepository userRepository;
     @Autowired
-    private ImageService imageService;
+    private AuthenticationManager authenticationManager;
     @Autowired
-    private CIInformationRepository ciInformationRepository;
+    private JwtUtils jwtUtils;
     @Autowired
-    private AccountService accountService;
-
+    private PasswordEncoder passwordEncoder;
     @Override
-    public UserDetailResponseDto showUserDetail(Long userid) {
-        User user = findById(userid);
-        UserDetailResponseDto dto = new UserDetailResponseDto(user);
-        if (user.getImage() != null) {
-            dto.setImage(IMAGE_REPO_URI + user.getImage().getName());
-        }
-        return dto;
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        User user = profileRepository.findByUsernameOrEmail(username, username)
+                .orElseThrow(() -> new NotFoundResponseException("101 : NOT_FOUND"))
+                .getBelongToUser();
+        user.setCredential(username);
+        return user;
     }
 
     @Override
-    public UserDetailResponseDto addUser(UserDetailDto dto) throws IOException {
-        User user = User.builder()
-                .account(accountService.createDefaultAccount(dto))
-                .ciInformation(dto.getInformation())
-                .phones(dto.getPhones())
-                .image(imageService.saveImage(dto.getImageFile(), null))
+    public Response<AuthResponseDto> authenticate(AuthenticationInfo info) {
+        UserDetails userDetails = loadUserByUsername(info.getCredential());
+        authenticationManager
+                .authenticate(new UsernamePasswordAuthenticationToken(userDetails, info.getPassword()));
+        String token = jwtUtils.generateToken(userDetails);
+        Date expiredTime = jwtUtils.extractExpiration(token);
+        AuthResponseDto data = AuthResponseDto.construct(token, expiredTime);
+        return new Response<>(Status.AUTHENTICATION_SUCCESSFUL, data);
+    }
+
+    @Override
+    @Transactional
+    public Response<AuthResponseDto> register(RegistrationInfo info) {
+        List<Authority> authorities = new ArrayList<>(Arrays.asList(Authority.USER));
+        Profile profile = Profile.builder()
+                .email(info.getEmail())
+                .username(info.getUsername())
                 .build();
-        return new UserDetailResponseDto(save(user));
-    }
+        User user = User.builder()
+                .password(passwordEncoder.encode(info.getPassword()))
+                .authorities(authorities)
+                .profile(profile)
+                .build();
 
-    @Override
-    public UserDetailResponseDto editUser(UserDetailDto dto, Long userid) throws IOException {
-        User user = findById(userid);
-        Long imageId = (user.getImage() != null ? user.getImage().getId() : null);
-        if (dto.getImageFile() != null) {
-            user.setImage(imageService.saveImage(dto.getImageFile(), imageId));
-        }
-        if (dto.getPhones() != null) {
-            user.setPhones(dto.getPhones());
-        }
-        if (dto.getInformation() != null) {
-            user.setCiInformation(dto.getInformation());
-        }
-        return new UserDetailResponseDto(save(user));
-    }
-
-    @Override
-    public User findById(Long id) {
-        return userRepository.findById(id).orElseThrow(() ->
-                new NotFoundResponseException("301 : Can't find user resource"));
-    }
-
-    @Override
-    public User save(User user) {
-        List<String> invalids = ValidUser.getUserInvalids(user);
-        if (ciInformationRepository.existsByIdCard(user.getCiInformation().getIdCard()) && user.getId() == 0) {
-            invalids.add("212 : User id card must be unique");
-        }
-        if (invalids.size() != 0) {
-            String asString = invalids.stream().collect(Collectors.joining("; "));
-            throw new BadRequestResponseException(asString);
-        }
-            return userRepository.save(user);
+        userRepository.save(user);
+        /*
+            return token for authentication
+         */
+        user.setCredential(info.getEmail());
+        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(user, info.getPassword()));
+        String token = jwtUtils.generateToken(user);
+        Date expiredTime = jwtUtils.extractExpiration(token);
+        AuthResponseDto data = AuthResponseDto.construct(token, expiredTime);
+        return new Response<>(Status.AUTHENTICATION_SUCCESSFUL, data);
     }
 }

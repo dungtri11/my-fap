@@ -1,7 +1,7 @@
 package com.portal.fap.utils;
 
 public class EmailUtils {
-    public static String generateEmailFromName(String name) {
+    public static String generateEmailFromName(String name, String roleNumber) {
         String[] parts = name.split(" ");
         String last = parts[parts.length-1];
         String prefix = last.toLowerCase();
@@ -11,6 +11,6 @@ public class EmailUtils {
             if (part.length() == 0 || part.equals(last)) continue;;
             prefix += part.charAt(0);
         }
-        return prefix.toLowerCase() + "he123456@fpt.edu.vn";
+        return prefix.toLowerCase() + roleNumber.toLowerCase() +"@fpt.edu.vn";
     }
 }

@@ -1,6 +1,6 @@
 package com.portal.fap.filter;
 
-import com.portal.fap.service.AccountService;
+import com.portal.fap.service.UserService;
 import com.portal.fap.utils.JwtUtils;
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
@@ -22,7 +22,7 @@ public class JwtAuthenticationFilter implements Filter {
     @Autowired
     private JwtUtils jwtUtils;
     @Autowired
-    private AccountService accountService;
+    private UserService userService;
 
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
@@ -56,6 +56,6 @@ public class JwtAuthenticationFilter implements Filter {
     }
 
     private UserDetails getUserDetailsFromUsername(String username) {
-        return accountService.loadUserByUsername(username);
+        return userService.loadUserByUsername(username);
     }
 }

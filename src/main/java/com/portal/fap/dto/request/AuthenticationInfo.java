@@ -1,6 +1,7 @@
 package com.portal.fap.dto.request;
 
-import com.portal.fap.entity.CIInformation;
+import com.portal.fap.common.Status;
+import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -10,7 +11,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserJsonRequestDto {
-    private CIInformation information;
-    private String phones;
+public class AuthenticationInfo {
+    private String credential;
+    private String password;
 }

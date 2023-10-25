@@ -5,12 +5,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.Date;
 @Getter
 @Setter
-@AllArgsConstructor
+@AllArgsConstructor(staticName = "construct")
 @NoArgsConstructor
-public class ResponseRegisterDto {
-    private String username;
-    private String email;
-    private String jwtToken;
+public class AuthResponseDto {
+    private String token;
+    private Date expireTime;
 }

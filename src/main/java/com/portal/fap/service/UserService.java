@@ -1,15 +1,12 @@
 package com.portal.fap.service;
 
-import com.portal.fap.dto.request.UserDetailDto;
-import com.portal.fap.dto.response.UserDetailResponseDto;
-import com.portal.fap.entity.User;
+import com.portal.fap.dto.Response;
+import com.portal.fap.dto.request.AuthenticationInfo;
+import com.portal.fap.dto.request.RegistrationInfo;
+import org.springframework.security.core.userdetails.UserDetailsService;
 
-import java.io.IOException;
+public interface UserService extends UserDetailsService {
+    public Response authenticate(AuthenticationInfo info);
 
-public interface UserService {
-    public UserDetailResponseDto showUserDetail(Long userid);
-    public UserDetailResponseDto addUser(UserDetailDto dto) throws IOException;
-    public UserDetailResponseDto editUser(UserDetailDto dto, Long userid) throws IOException;
-    public User findById(Long id);
-    public User save(User user);
+    public Response register(RegistrationInfo info);
 }

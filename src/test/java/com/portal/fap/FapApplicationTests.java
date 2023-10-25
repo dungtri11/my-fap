@@ -8,6 +8,7 @@ class FapApplicationTests {
 
 	@Test
 	void contextLoads() {
+
 	}
 
 }

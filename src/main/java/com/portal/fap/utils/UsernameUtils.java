@@ -1,7 +1,7 @@
 package com.portal.fap.utils;
 
 public class UsernameUtils {
-    public static String generateUsernameFromName(String name) {
-        return EmailUtils.generateEmailFromName(name).replaceAll("@fpt\\.edu\\.vn", "");
+    public static String generateUsernameFromNameAndRoleNumber(String name, String roleNumber) {
+        return EmailUtils.generateEmailFromName(name, roleNumber).replaceAll("@fpt\\.edu\\.vn", "");
     }
 }

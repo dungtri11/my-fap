@@ -14,7 +14,6 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -50,46 +49,15 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain authenticationFilterChain(HttpSecurity http) throws Exception {
         http
-                .securityMatcher(AntPathRequestMatcher.antMatcher("/auth/**"))
+                .securityMatcher(AntPathRequestMatcher.antMatcher("/api/auth/**"))
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.POST,"/auth/login")).permitAll()
-                        .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.POST,"/auth/register")).permitAll()
-                        .anyRequest().denyAll())
-                .addFilterBefore(filter, AuthorizationFilter.class);
+                        .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.POST,"/api/auth/register")).permitAll()
+                        .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.POST,"/api/auth/login")).permitAll()
+                        .anyRequest().authenticated());
         return http.build();
     }
 
-    @Bean
-    public SecurityFilterChain userFilterChain(HttpSecurity http) throws Exception {
-        http
-                .securityMatcher(AntPathRequestMatcher.antMatcher("/user/**"))
-                .exceptionHandling(handler -> handler.authenticationEntryPoint(entryPoint))
-                .csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(authorize -> authorize
-//                        .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.POST, "/user/add"))
-//                        .hasAuthority("ADMIN")
-//                        //--------------------------------
-//                        .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.PUT, "/user/edit/**"))
-//                        .hasAuthority("ADMIN")
-//                        //--------------------------------
-//                        .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.GET, "/user/detail/**"))
-//                        .hasAuthority("ADMIN")
-                        .anyRequest().permitAll())
-                .addFilterBefore(filter, AuthorizationFilter.class);
 
-        return http.build();
-    }
-
-    @Bean
-    public SecurityFilterChain imageFilterChain(HttpSecurity http) throws Exception {
-        http
-                .securityMatcher(AntPathRequestMatcher.antMatcher("/image/**"))
-                .exceptionHandling(handler -> handler.authenticationEntryPoint(entryPoint))
-                .csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(authorize -> authorize
-                        .anyRequest().permitAll());
-        return http.build();
-    }
 
 }
